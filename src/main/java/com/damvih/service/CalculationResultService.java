@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,12 @@ public class CalculationResultService {
         }
 
         return participants;
+    }
+
+    public List<ParticipantDto> sort(List<ParticipantDto> participants) {
+        return participants.stream()
+                .sorted((p1, p2) -> p2.getCounted().compareTo(p1.getCounted()))
+                .collect(Collectors.toList());
     }
 
     private int getCount(List<Long> memberIds, List<Long> likeIds) {
