@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -22,7 +21,6 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 @Service
-@Slf4j
 public class VkApiService {
 
     private static final String MAIN_URL = "https://api.vk.com/method/";
@@ -143,7 +141,6 @@ public class VkApiService {
 
     private JsonNode getResponseNode(HttpRequest request) throws IOException, InterruptedException {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        log.info("Response body: {}", response.body());
         return mapper.readTree(response.body());
     }
 
