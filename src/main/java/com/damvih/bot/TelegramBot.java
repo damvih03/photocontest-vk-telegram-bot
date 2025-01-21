@@ -39,7 +39,7 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
     @Override
     public void consume(Update update) {
         if (hasUpdateTextMessage(update)) {
-            String input = update.getMessage().getText().trim();
+            String input = update.getMessage().getText().trim().split(" ")[0];
 
             SendMessage message;
             if (handlerContainer.containsHandler(input)) {
