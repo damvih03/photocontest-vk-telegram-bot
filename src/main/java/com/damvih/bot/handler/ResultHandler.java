@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +31,6 @@ public class ResultHandler implements Handler {
 
     @Override
     public SendMessage prepareMessage(Update update) {
-
         String[] messageInput = update.getMessage().getText().split(DELIMITER);
 
         Long groupId = Long.parseLong(messageInput[GROUP_ID_MESSAGE_POSITION]);
@@ -46,10 +46,31 @@ public class ResultHandler implements Handler {
     }
 
     private String createText(List<ParticipantDto> participants) {
-        String text = "";
+        StringBuilder text = new StringBuilder();
+        Integer lastCounted = null;
+        int currentRank = 0;
+        int offset = 0;
         for (ParticipantDto participant : participants) {
-            text += "ID: " + participant.getId() + " | " + participant.getCounted() + "/" + participant.getTotal() + "\n";
+            if (!Objects.equals(participant.getCounted(), lastCounted)) {
+                currentRank += offset + 1;
+                lastCounted = participant.getCounted();
+                offset = 0;
+            } else {
+                offset += 1;
+            }
+
+            text.append(
+                    getParticipantOutput(participant, currentRank)
+            );
         }
-        return text;
+        return text.toString();
+    }
+
+    private StringBuilder getParticipantOutput(ParticipantDto participant, int currentRank) {
+        return new StringBuilder()
+                .append("Место: ").append(currentRank)
+                .append(" | ID: ").append(participant.getId())
+                .append(" | ").append(participant.getCounted()).append("/").append(participant.getTotal())
+                .append("\n");
     }
 }
