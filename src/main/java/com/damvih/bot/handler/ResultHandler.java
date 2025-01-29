@@ -2,7 +2,6 @@ package com.damvih.bot.handler;
 
 import com.damvih.dto.ParticipantDto;
 import com.damvih.service.CalculationResultService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -15,8 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-@RequiredArgsConstructor
-public class ResultHandler implements Handler {
+public class ResultHandler extends Handler {
 
     private static final int GROUP_ID_MESSAGE_POSITION = 1;
     private static final int ALBUM_ID_MESSAGE_POSITION = 2;
@@ -24,14 +22,9 @@ public class ResultHandler implements Handler {
     public static final int UTC_OFFSET = 10;
     private final CalculationResultService calculationResultService;
 
-    @Override
-    public String getIdentifier() {
-        return "/result";
-    }
-
-    @Override
-    public String getDescription() {
-        return "получить результат";
+    public ResultHandler(CalculationResultService calculationResultService) {
+        super("/result", "получить результат");
+        this.calculationResultService = calculationResultService;
     }
 
     @Override

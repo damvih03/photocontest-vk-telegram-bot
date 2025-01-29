@@ -9,19 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class HelpHandler implements Handler {
+public class HelpHandler extends Handler {
 
-    private static final String DESCRIPTION = "помощь";
     private String MESSAGE;
 
-    @Override
-    public String getIdentifier() {
-        return "/help";
-    }
-
-    @Override
-    public String getDescription() {
-        return DESCRIPTION;
+    public HelpHandler() {
+        super("/help", "помощь");
     }
 
     @Override
