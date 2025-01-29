@@ -68,9 +68,11 @@ public class ResultHandler implements Handler {
 
     private StringBuilder getParticipantOutput(ParticipantDto participant, int currentRank) {
         return new StringBuilder()
-                .append("Место: ").append(currentRank)
-                .append(" | ID: ").append(participant.getId())
-                .append(" | ").append(participant.getCounted()).append("/").append(participant.getTotal())
-                .append("\n");
+                .append("***").append("\n")
+                .append("🏆 Место: ").append(currentRank).append("\n")
+                .append("👥 Пара: ").append(participant.getName()).append("\n")
+                .append("📊 Счет: ").append(participant.getCounted()).append("/").append(participant.getTotal()).append("\n")
+                .append("🆔 ID: ").append(participant.getId()).append("\n")
+                .append("***").append("\n");
     }
 }
