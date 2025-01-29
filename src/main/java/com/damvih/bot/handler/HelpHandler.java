@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 @Component
 public class HelpHandler implements Handler {
 
-    private String description;
+    private static final String DESCRIPTION = "помощь";
+    private String MESSAGE;
 
     @Override
     public String getIdentifier() {
@@ -20,20 +21,20 @@ public class HelpHandler implements Handler {
 
     @Override
     public String getDescription() {
-        return description;
+        return DESCRIPTION;
     }
 
     @Override
     public SendMessage prepareMessage(Update update) {
         return SendMessage.builder()
                 .chatId(update.getMessage().getChatId())
-                .text(description)
+                .text(MESSAGE)
                 .build();
     }
 
     @Autowired
     public void initializeDescription(List<Handler> handlers) {
-        description = handlers.stream()
+        MESSAGE = handlers.stream()
                 .map(handler -> handler.getIdentifier() + " - " + handler.getDescription())
                 .collect(Collectors.joining("\n"));
 
