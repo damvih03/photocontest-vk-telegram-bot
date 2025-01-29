@@ -1,15 +1,23 @@
 package com.damvih.bot;
 
+import com.damvih.bot.handler.Handler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, SpringLongPollingBot {
@@ -59,9 +67,9 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
                 .build();
     }
 
-    public void send(SendMessage sendMessage) {
+    public void send(BotApiMethod<?> request) {
         try {
-            telegramClient.execute(sendMessage);
+            telegramClient.execute(request);
         } catch (TelegramApiException exception) {
 
         }
@@ -70,6 +78,18 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
 
     private boolean hasUpdateTextMessage(Update update) {
         return update.hasMessage() && update.getMessage().hasText();
+    }
+
+    @Autowired
+    private void initMenu(List<Handler> handlers) {
+        List<BotCommand> commands = new ArrayList<>();
+        for (Handler handler : handlers) {
+            commands.add(new BotCommand(
+                    handler.getIdentifier(),
+                    handler.getDescription()
+            ));
+        }
+        send(new SetMyCommands(commands));
     }
 
 }
