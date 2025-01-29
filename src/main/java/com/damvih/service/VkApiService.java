@@ -1,5 +1,6 @@
 package com.damvih.service;
 
+import com.damvih.dto.api.VkApiPhotoResponse;
 import com.damvih.dto.api.VkApiResponseContent;
 import com.damvih.dto.api.error.VkApiErrorResponseContent;
 import com.damvih.exception.ExternalApiException;
@@ -58,7 +59,7 @@ public class VkApiService {
         }
     }
 
-    public List<Long> getPhotoIds(Long groupId, Long albumId) {
+    public List<VkApiPhotoResponse> getPhotoIds(Long groupId, Long albumId) {
         String methodName = "photos.get";
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -69,9 +70,10 @@ public class VkApiService {
         params.add("rev", "0");
 
         try {
-            return getAllItems(methodName, params).stream()
-                    .map(item -> item.get("id").asLong())
-                    .toList();
+            return mapper.convertValue(
+                    getAllItems(methodName, params),
+                    new TypeReference<>() {}
+            );
         } catch (Exception exception) {
             throw new ExternalApiException(exception.getMessage());
         }
@@ -86,7 +88,6 @@ public class VkApiService {
         params.add("type", PHOTO_TYPE);
         params.add("count", String.valueOf(COUNT));
         params.add("offset", String.valueOf(START_OFFSET));
-        ;
 
         try {
             return mapper.convertValue(

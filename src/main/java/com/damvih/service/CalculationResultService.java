@@ -1,6 +1,7 @@
 package com.damvih.service;
 
 import com.damvih.dto.ParticipantDto;
+import com.damvih.dto.api.VkApiPhotoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +20,18 @@ public class CalculationResultService {
         List<ParticipantDto> participants = new ArrayList<>();
 
         List<Long> memberIds = vkApiService.getGroupMemberIds(groupId);
-        List<Long> photoIds = vkApiService.getPhotoIds(groupId, albumId);
+        List<VkApiPhotoResponse> photos = vkApiService.getPhotoIds(groupId, albumId);
 
-        for (Long photoId : photoIds) {
-            List<Long> likeIds =  vkApiService.getLikeIds(groupId, photoId);
+        for (VkApiPhotoResponse photo: photos) {
+            List<Long> likeIds =  vkApiService.getLikeIds(groupId, photo.getId());
             int count = getCount(memberIds, likeIds);
             int total = likeIds.size();
             participants.add(
-                    new ParticipantDto(photoId, count, total)
+                    new ParticipantDto(
+                            photo.getId(),
+                            photo.getText(),
+                            count,
+                            total)
             );
         }
 

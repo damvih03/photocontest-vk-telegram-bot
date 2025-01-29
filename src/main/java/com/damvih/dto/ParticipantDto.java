@@ -12,6 +12,7 @@ import lombok.Setter;
 public class ParticipantDto {
 
     private Long id;
+    private String name;
     private Integer counted;
     private Integer total;
 
