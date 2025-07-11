@@ -1,5 +1,8 @@
 package com.damvih.bot.handler;
 
+import com.damvih.message.OutgoingMessage;
+import com.damvih.message.TelegramOutgoingMessage;
+import com.damvih.service.MessageDispatcherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,11 +21,15 @@ public class HelpHandler extends Handler {
     }
 
     @Override
-    public SendMessage prepareMessage(Update update) {
-        return SendMessage.builder()
+    public void perform(Update update) {
+        SendMessage sendMessage = SendMessage.builder()
                 .chatId(update.getMessage().getChatId())
                 .text(MESSAGE)
                 .build();
+
+        OutgoingMessage message = new TelegramOutgoingMessage(sendMessage);
+        MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
+        messageDispatcherService.dispatch(message);
     }
 
     @Autowired

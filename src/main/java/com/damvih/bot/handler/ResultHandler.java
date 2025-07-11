@@ -1,7 +1,10 @@
 package com.damvih.bot.handler;
 
 import com.damvih.dto.ParticipantDto;
+import com.damvih.message.OutgoingMessage;
+import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.CalculationResultService;
+import com.damvih.service.MessageDispatcherService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -28,7 +31,7 @@ public class ResultHandler extends Handler {
     }
 
     @Override
-    public SendMessage prepareMessage(Update update) {
+    public void perform(Update update) {
         String datetime = getDatetimeNowText();
 
         String[] messageInput = update.getMessage().getText().split(DELIMITER);
@@ -39,11 +42,13 @@ public class ResultHandler extends Handler {
         List<ParticipantDto> participants = calculationResultService.calculate(groupId, albumId);
         participants = calculationResultService.sort(participants);
 
-        return SendMessage.builder()
+        SendMessage sortedParticipantResultMessage = SendMessage.builder()
                 .chatId(update.getMessage().getChatId())
-                .text(
-                        datetime + createText(participants))
+                .text(datetime + createText(participants))
                 .build();
+
+        MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
+        messageDispatcherService.dispatch(new TelegramOutgoingMessage(sortedParticipantResultMessage));
     }
 
     private String createText(List<ParticipantDto> participants) {

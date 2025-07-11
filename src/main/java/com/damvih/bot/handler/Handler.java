@@ -1,12 +1,16 @@
 package com.damvih.bot.handler;
 
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import com.damvih.service.MessageDispatcherService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 abstract public class Handler {
 
     private final String identifier;
     private final String description;
+
+    @Autowired
+    private MessageDispatcherService messageDispatcherService;
 
     public Handler(String identifier, String description) {
         this.identifier = identifier;
@@ -21,7 +25,11 @@ abstract public class Handler {
         return description;
     }
 
-    abstract public SendMessage prepareMessage(Update update);
+    protected MessageDispatcherService getMessageDispatcherService() {
+        return messageDispatcherService;
+    }
+
+    abstract public void perform(Update update);
 
     private String capitalize(String input) {
         if (input == null || input.isEmpty()) {

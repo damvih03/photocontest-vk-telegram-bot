@@ -49,12 +49,12 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
 
             SendMessage message;
             if (handlerContainer.containsHandler(input)) {
-                message = handlerContainer.getHandler(input).prepareMessage(update);
+                handlerContainer.getHandler(input).perform(update);
             } else {
                 message = getMessageForUnknownHandler(update);
+                messageDispatcherService.dispatch(new TelegramOutgoingMessage(message));
             }
 
-            messageDispatcherService.dispatch(new TelegramOutgoingMessage(message));
         }
     }
 
