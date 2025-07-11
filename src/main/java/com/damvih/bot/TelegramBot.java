@@ -1,20 +1,18 @@
 package com.damvih.bot;
 
 import com.damvih.bot.handler.Handler;
+import com.damvih.message.TelegramOutgoingMessage;
+import com.damvih.service.MessageDispatcherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +21,15 @@ import java.util.List;
 public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, SpringLongPollingBot {
 
     private static final String MESSAGE_FOR_UNKNOWN_HANDLER = "Введена неизвестная команда!";
-    private final TelegramClient telegramClient;
     private final HandlerContainer handlerContainer;
+    private final MessageDispatcherService messageDispatcherService;
 
     private final String token;
 
-    public TelegramBot(@Value("${TELEGRAM_BOT_TOKEN}") String token, HandlerContainer handlerContainer) {
-        this.telegramClient = new OkHttpTelegramClient(token);
+    public TelegramBot(@Value("${TELEGRAM_BOT_TOKEN}") String token, HandlerContainer handlerContainer, MessageDispatcherService messageDispatcherService) {
         this.handlerContainer = handlerContainer;
         this.token = token;
+        this.messageDispatcherService = messageDispatcherService;
     }
 
     @Override
@@ -56,7 +54,7 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
                 message = getMessageForUnknownHandler(update);
             }
 
-            send(message);
+            messageDispatcherService.dispatch(new TelegramOutgoingMessage(message));
         }
     }
 
@@ -65,15 +63,6 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
                 .chatId(update.getMessage().getChatId())
                 .text(MESSAGE_FOR_UNKNOWN_HANDLER)
                 .build();
-    }
-
-    public void send(BotApiMethod<?> request) {
-        try {
-            telegramClient.execute(request);
-        } catch (TelegramApiException exception) {
-
-        }
-
     }
 
     private boolean hasUpdateTextMessage(Update update) {
@@ -89,7 +78,9 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
                     handler.getDescription()
             ));
         }
-        send(new SetMyCommands(commands));
+        SetMyCommands setMyCommands = new SetMyCommands(commands);
+
+        messageDispatcherService.dispatch(new TelegramOutgoingMessage(setMyCommands));
     }
 
 }
