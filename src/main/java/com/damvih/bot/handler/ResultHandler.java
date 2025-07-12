@@ -1,7 +1,6 @@
 package com.damvih.bot.handler;
 
 import com.damvih.dto.ParticipantDto;
-import com.damvih.message.OutgoingMessage;
 import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.CalculationResultService;
 import com.damvih.service.MessageDispatcherService;
@@ -24,12 +23,15 @@ public class ResultHandler extends Handler {
     private static final String DELIMITER = " ";
     public static final int UTC_OFFSET = 10;
     private final CalculationResultService calculationResultService;
+    private final MessageDispatcherService messageDispatcherService;
 
-    public ResultHandler(CalculationResultService calculationResultService) {
+    public ResultHandler(CalculationResultService calculationResultService, MessageDispatcherService messageDispatcherService) {
         super("/result", "получить результат");
         this.calculationResultService = calculationResultService;
+        this.messageDispatcherService = messageDispatcherService;
     }
 
+    // TODO: Refactor this method to reduce code
     @Override
     public void perform(Update update) {
         String datetime = getDatetimeNowText();
@@ -39,25 +41,50 @@ public class ResultHandler extends Handler {
         Long groupId = Long.parseLong(messageInput[GROUP_ID_MESSAGE_POSITION]);
         Long albumId = Long.parseLong(messageInput[ALBUM_ID_MESSAGE_POSITION]);
 
+        SendMessage loadingMessage = SendMessage.builder()
+                .chatId(update.getMessage().getChatId())
+                .text("Начинается определение результата. Подождите, процесс может занимать до нескольких минут.")
+                .build();
+        messageDispatcherService.dispatch(new TelegramOutgoingMessage(loadingMessage));
+
         List<ParticipantDto> participants = calculationResultService.calculate(groupId, albumId);
+
+        if (participants.isEmpty()) {
+            SendMessage emptyMessageError = SendMessage.builder()
+                    .chatId(update.getMessage().getChatId())
+                    .text("Ошибка: альбом не должен быть пустым.")
+                    .build();
+            messageDispatcherService.dispatch(new TelegramOutgoingMessage(emptyMessageError));
+            return;
+        }
+
         participants = calculationResultService.sort(participants);
+
+        List<ParticipantDto> winners = calculationResultService.getWinners(participants);
 
         SendMessage sortedParticipantResultMessage = SendMessage.builder()
                 .chatId(update.getMessage().getChatId())
-                .text(datetime + createText(participants))
+                .text(datetime + createParticipantsSortedText(participants))
+                .build();
+
+        SendMessage winnersMessage = SendMessage.builder()
+                .chatId(update.getMessage().getChatId())
+                .text(createWinnersText(winners))
                 .build();
 
         MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(sortedParticipantResultMessage));
+        messageDispatcherService.dispatch(new TelegramOutgoingMessage(winnersMessage));
     }
 
-    private String createText(List<ParticipantDto> participants) {
+    private String createParticipantsSortedText(List<ParticipantDto> participants) {
         StringBuilder text = new StringBuilder();
         Integer lastCounted = null;
         int currentRank = 0;
         int offset = 0;
 
-        text.append(getHeaderOutput());
+        text.append("\n*** Результат фотоконкурса 'Двойной удар' ")
+                .append(LocalDateTime.now().getYear()).append(" ***\n");
 
         for (ParticipantDto participant : participants) {
             if (!Objects.equals(participant.getCounted(), lastCounted)) {
@@ -85,12 +112,6 @@ public class ResultHandler extends Handler {
                 .toString();
     }
 
-    private String getHeaderOutput() {
-        return "\n*** Результат фотоконкурса 'Двойной удар' " +
-                LocalDateTime.now().getYear() +
-                " ***\n";
-    }
-
     private StringBuilder getParticipantOutput(ParticipantDto participant, int currentRank) {
         return new StringBuilder()
                 .append("***").append("\n")
@@ -100,4 +121,24 @@ public class ResultHandler extends Handler {
                 .append("🆔 ID: ").append(participant.getId()).append("\n")
                 .append("***").append("\n");
     }
+
+    private String createWinnersText(List<ParticipantDto> participants) {
+        StringBuilder text = new StringBuilder();
+
+        text.append("***").append(" \uD83C\uDFC5 ");
+        if (participants.size() > 1) {
+            text.append("Победители");
+        } else {
+            text.append("Победитель");
+        }
+        text.append(" \uD83C\uDFC5 ");
+        text.append("***").append("\n");
+
+        for (ParticipantDto participant : participants) {
+            text.append("👥 Пара: ").append(participant.getName()).append("\n");
+        }
+
+        return text.toString();
+    }
+
 }
