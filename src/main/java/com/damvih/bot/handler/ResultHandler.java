@@ -21,7 +21,6 @@ public class ResultHandler extends Handler {
     private static final int GROUP_ID_MESSAGE_POSITION = 1;
     private static final int ALBUM_ID_MESSAGE_POSITION = 2;
     private static final String DELIMITER = " ";
-    public static final int UTC_OFFSET = 10;
     private final CalculationResultService calculationResultService;
     private final MessageDispatcherService messageDispatcherService;
 
@@ -103,10 +102,10 @@ public class ResultHandler extends Handler {
     }
 
     private String getDatetimeNowText() {
-        StringBuilder output = new StringBuilder("⏰ Дата и время запроса (+" + UTC_OFFSET + " UTC): ");
-        ZonedDateTime dateTimeInUTCPlus10 = LocalDateTime.now()
-                .atZone(ZoneOffset.ofHours(UTC_OFFSET));
-        String datetime = dateTimeInUTCPlus10.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+        StringBuilder output = new StringBuilder("⏰ Дата и время запроса (по Гринвичу): ");
+        ZonedDateTime dateTimeInUTC = LocalDateTime.now()
+                .atZone(ZoneOffset.UTC);
+        String datetime = dateTimeInUTC.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
         return output.append(datetime)
                 .append("\n")
                 .toString();
