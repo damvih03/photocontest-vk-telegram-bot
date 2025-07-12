@@ -103,8 +103,7 @@ public class ResultHandler extends Handler {
 
     private String getDatetimeNowText() {
         StringBuilder output = new StringBuilder("⏰ Дата и время запроса (по Гринвичу): ");
-        ZonedDateTime dateTimeInUTC = LocalDateTime.now()
-                .atZone(ZoneOffset.UTC);
+        ZonedDateTime dateTimeInUTC = ZonedDateTime.now(ZoneOffset.UTC);
         String datetime = dateTimeInUTC.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
         return output.append(datetime)
                 .append("\n")
