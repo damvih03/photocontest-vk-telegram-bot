@@ -4,6 +4,8 @@ import com.damvih.dto.ParticipantDto;
 import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.CalculationResultService;
 import com.damvih.service.MessageDispatcherService;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -16,18 +18,18 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
+@Setter(onMethod_ = {@Autowired})
 public class ResultHandler extends Handler {
 
     private static final int GROUP_ID_MESSAGE_POSITION = 1;
     private static final int ALBUM_ID_MESSAGE_POSITION = 2;
     private static final String DELIMITER = " ";
-    private final CalculationResultService calculationResultService;
-    private final MessageDispatcherService messageDispatcherService;
 
-    public ResultHandler(CalculationResultService calculationResultService, MessageDispatcherService messageDispatcherService) {
+    private CalculationResultService calculationResultService;
+    private MessageDispatcherService messageDispatcherService;
+
+    public ResultHandler() {
         super("/result", "получить результат");
-        this.calculationResultService = calculationResultService;
-        this.messageDispatcherService = messageDispatcherService;
     }
 
     // TODO: Refactor this method to reduce code
