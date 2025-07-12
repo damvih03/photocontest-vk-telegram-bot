@@ -44,6 +44,14 @@ public class CalculationResultService {
                 .collect(Collectors.toList());
     }
 
+    public List<ParticipantDto> getWinners(List<ParticipantDto> participants) {
+        // We trust that the list is sorted in down and not empty
+        Integer max = participants.getFirst().getCounted();
+        return participants.stream()
+                .takeWhile(p -> p.getCounted().equals(max))
+                .collect(Collectors.toList());
+    }
+
     private int getCount(List<Long> memberIds, List<Long> likeIds) {
         int count = 0;
         for (Long likeId : likeIds) {
