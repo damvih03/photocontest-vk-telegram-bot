@@ -32,7 +32,6 @@ public class ResultHandler extends Handler {
         super("/result", "получить результат");
     }
 
-    // TODO: Refactor this method to reduce code
     @Override
     public void perform(Update update) {
         MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
