@@ -25,7 +25,6 @@ public class ResultHandler extends Handler {
     private static final String EMPTY_ALBUM_MESSAGE = "Ошибка: альбом не должен быть пустым.";
 
     private CalculationResultService calculationResultService;
-    private MessageDispatcherService messageDispatcherService;
     private ResultTextFormatter resultTextFormatter;
     private TelegramMessageFactory telegramMessageFactory;
 
@@ -36,6 +35,8 @@ public class ResultHandler extends Handler {
     // TODO: Refactor this method to reduce code
     @Override
     public void perform(Update update) {
+        MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
+
         Long chatId = update.getMessage().getChatId();
         String datetime = resultTextFormatter.formatDateTimeNowText();
 
@@ -62,7 +63,6 @@ public class ResultHandler extends Handler {
         SendMessage sortedParticipantResultMessage = telegramMessageFactory.create(chatId, datetime + resultTextFormatter.formatParticipants(participants));
         SendMessage winnersMessage = telegramMessageFactory.create(chatId, resultTextFormatter.formatParticipants(winners));
 
-        MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(sortedParticipantResultMessage));
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(winnersMessage));
     }
