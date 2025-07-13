@@ -5,6 +5,7 @@ import com.damvih.message.TelegramMessageFactory;
 import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.CalculationResultService;
 import com.damvih.service.MessageDispatcherService;
+import com.damvih.util.ResultTextFormatter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.damvih.bot.handler;
+package com.damvih.util;
 
 import com.damvih.dto.ParticipantDto;
 import org.springframework.stereotype.Component;
