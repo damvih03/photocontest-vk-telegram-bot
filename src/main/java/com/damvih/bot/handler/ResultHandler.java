@@ -1,6 +1,7 @@
 package com.damvih.bot.handler;
 
 import com.damvih.dto.ParticipantDto;
+import com.damvih.message.TelegramMessageFactory;
 import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.CalculationResultService;
 import com.damvih.service.MessageDispatcherService;
@@ -26,6 +27,7 @@ public class ResultHandler extends Handler {
     private CalculationResultService calculationResultService;
     private MessageDispatcherService messageDispatcherService;
     private ResultTextFormatter resultTextFormatter;
+    private TelegramMessageFactory telegramMessageFactory;
 
     public ResultHandler() {
         super("/result", "получить результат");
@@ -34,6 +36,7 @@ public class ResultHandler extends Handler {
     // TODO: Refactor this method to reduce code
     @Override
     public void perform(Update update) {
+        Long chatId = update.getMessage().getChatId();
         String datetime = resultTextFormatter.formatDateTimeNowText();
 
         String[] messageInput = update.getMessage().getText().split(DELIMITER);
@@ -41,19 +44,13 @@ public class ResultHandler extends Handler {
         Long groupId = Long.parseLong(messageInput[GROUP_ID_MESSAGE_POSITION]);
         Long albumId = Long.parseLong(messageInput[ALBUM_ID_MESSAGE_POSITION]);
 
-        SendMessage loadingMessage = SendMessage.builder()
-                .chatId(update.getMessage().getChatId())
-                .text(LOADING_MESSAGE)
-                .build();
+        SendMessage loadingMessage = telegramMessageFactory.create(chatId, LOADING_MESSAGE);
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(loadingMessage));
 
         List<ParticipantDto> participants = calculationResultService.calculate(groupId, albumId);
 
         if (participants.isEmpty()) {
-            SendMessage emptyMessageError = SendMessage.builder()
-                    .chatId(update.getMessage().getChatId())
-                    .text(EMPTY_ALBUM_MESSAGE)
-                    .build();
+            SendMessage emptyMessageError = telegramMessageFactory.create(chatId, EMPTY_ALBUM_MESSAGE);
             messageDispatcherService.dispatch(new TelegramOutgoingMessage(emptyMessageError));
             return;
         }
@@ -62,15 +59,8 @@ public class ResultHandler extends Handler {
 
         List<ParticipantDto> winners = calculationResultService.getWinners(participants);
 
-        SendMessage sortedParticipantResultMessage = SendMessage.builder()
-                .chatId(update.getMessage().getChatId())
-                .text(datetime + resultTextFormatter.formatParticipants(participants))
-                .build();
-
-        SendMessage winnersMessage = SendMessage.builder()
-                .chatId(update.getMessage().getChatId())
-                .text(resultTextFormatter.formatWinners(winners))
-                .build();
+        SendMessage sortedParticipantResultMessage = telegramMessageFactory.create(chatId, datetime + resultTextFormatter.formatParticipants(participants));
+        SendMessage winnersMessage = telegramMessageFactory.create(chatId, resultTextFormatter.formatParticipants(winners));
 
         MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(sortedParticipantResultMessage));
