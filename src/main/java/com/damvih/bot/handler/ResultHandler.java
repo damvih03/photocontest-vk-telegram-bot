@@ -20,6 +20,9 @@ public class ResultHandler extends Handler {
     private static final int ALBUM_ID_MESSAGE_POSITION = 2;
     private static final String DELIMITER = " ";
 
+    private static final String LOADING_MESSAGE = "Начинается определение результата. Подождите, процесс может занимать до нескольких минут.";
+    private static final String EMPTY_ALBUM_MESSAGE = "Ошибка: альбом не должен быть пустым.";
+
     private CalculationResultService calculationResultService;
     private MessageDispatcherService messageDispatcherService;
     private ResultTextFormatter resultTextFormatter;
@@ -40,7 +43,7 @@ public class ResultHandler extends Handler {
 
         SendMessage loadingMessage = SendMessage.builder()
                 .chatId(update.getMessage().getChatId())
-                .text("Начинается определение результата. Подождите, процесс может занимать до нескольких минут.")
+                .text(LOADING_MESSAGE)
                 .build();
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(loadingMessage));
 
@@ -49,7 +52,7 @@ public class ResultHandler extends Handler {
         if (participants.isEmpty()) {
             SendMessage emptyMessageError = SendMessage.builder()
                     .chatId(update.getMessage().getChatId())
-                    .text("Ошибка: альбом не должен быть пустым.")
+                    .text(EMPTY_ALBUM_MESSAGE)
                     .build();
             messageDispatcherService.dispatch(new TelegramOutgoingMessage(emptyMessageError));
             return;
