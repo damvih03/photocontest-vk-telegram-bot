@@ -61,7 +61,7 @@ public class ResultHandler extends Handler {
         List<ParticipantDto> winners = calculationResultService.getWinners(participants);
 
         SendMessage sortedParticipantResultMessage = telegramMessageFactory.create(chatId, datetime + resultTextFormatter.formatParticipants(participants));
-        SendMessage winnersMessage = telegramMessageFactory.create(chatId, resultTextFormatter.formatParticipants(winners));
+        SendMessage winnersMessage = telegramMessageFactory.create(chatId, resultTextFormatter.formatWinners(winners));
 
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(sortedParticipantResultMessage));
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(winnersMessage));
