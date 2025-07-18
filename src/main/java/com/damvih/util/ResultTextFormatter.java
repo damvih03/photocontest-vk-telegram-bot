@@ -15,8 +15,7 @@ public class ResultTextFormatter {
 
     public String formatDateTimeNowText() {
         StringBuilder output = new StringBuilder("⏰ Дата и время запроса (по Гринвичу): ");
-        ZonedDateTime dateTimeInUTCPlus10 = LocalDateTime.now()
-                .atZone(ZoneOffset.UTC);
+        ZonedDateTime dateTimeInUTCPlus10 = ZonedDateTime.now(ZoneOffset.UTC);
         String datetime = dateTimeInUTCPlus10.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
         return output.append(datetime)
                 .append("\n")
