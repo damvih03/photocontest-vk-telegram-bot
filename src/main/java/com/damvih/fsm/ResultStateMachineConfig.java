@@ -1,5 +1,10 @@
 package com.damvih.fsm;
 
+import com.damvih.fsm.action.AlbumReceivedResultAction;
+import com.damvih.fsm.action.ConfirmationReceivedResultAction;
+import com.damvih.fsm.action.GroupReceivedResultAction;
+import com.damvih.fsm.state.ResultEvent;
+import com.damvih.fsm.state.ResultState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachineFactory;

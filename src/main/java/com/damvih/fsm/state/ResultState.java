@@ -1,4 +1,4 @@
-package com.damvih.fsm;
+package com.damvih.fsm.state;
 
 public enum ResultState {
 

@@ -1,6 +1,8 @@
-package com.damvih.fsm;
+package com.damvih.fsm.action;
 
 import com.damvih.dto.UserSettingsDto;
+import com.damvih.fsm.state.ResultEvent;
+import com.damvih.fsm.state.ResultState;
 import com.damvih.message.TelegramMessageFactory;
 import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.MessageDispatcherService;

@@ -18,6 +18,7 @@ public class FSMService {
     public StateMachine<?, ?> create(Long id, String identifier) {
         StateMachine<?, ?> stateMachine = stateMachineFactory.getStateMachine();
         stateMachine.getExtendedState().getVariables().put("identifier", identifier);
+        stateMachine.getExtendedState().getVariables().put("userId", id);
         inMemoryUserStateService.add(id, stateMachine);
         return stateMachine;
     }

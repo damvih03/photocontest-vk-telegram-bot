@@ -1,7 +1,7 @@
 package com.damvih.bot.handler;
 
-import com.damvih.fsm.ResultEvent;
-import com.damvih.fsm.ResultState;
+import com.damvih.fsm.state.ResultEvent;
+import com.damvih.fsm.state.ResultState;
 import com.damvih.message.TelegramMessageFactory;
 import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.FSMService;
