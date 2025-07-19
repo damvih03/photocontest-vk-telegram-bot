@@ -2,6 +2,7 @@ package com.damvih.bot;
 
 import com.damvih.bot.handler.Handler;
 import com.damvih.message.TelegramOutgoingMessage;
+import com.damvih.service.FSMService;
 import com.damvih.service.MessageDispatcherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,13 +24,15 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
     private static final String MESSAGE_FOR_UNKNOWN_HANDLER = "Введена неизвестная команда!";
     private final HandlerContainer handlerContainer;
     private final MessageDispatcherService messageDispatcherService;
+    private final FSMService fsmService;
 
     private final String token;
 
-    public TelegramBot(@Value("${TELEGRAM_BOT_TOKEN}") String token, HandlerContainer handlerContainer, MessageDispatcherService messageDispatcherService) {
+    public TelegramBot(@Value("${TELEGRAM_BOT_TOKEN}") String token, HandlerContainer handlerContainer, MessageDispatcherService messageDispatcherService, FSMService fsmService) {
         this.handlerContainer = handlerContainer;
         this.token = token;
         this.messageDispatcherService = messageDispatcherService;
+        this.fsmService = fsmService;
     }
 
     @Override
@@ -46,12 +49,18 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer, Sprin
     public void consume(Update update) {
         if (hasUpdateTextMessage(update)) {
             String input = update.getMessage().getText().trim().split(" ")[0];
+            Long chatId = update.getMessage().getChatId();
 
-            SendMessage message;
+            if (fsmService.hasMachine(chatId)) {
+                String identifier = fsmService.getHandlerIdentifier(chatId);
+                handlerContainer.getHandler(identifier).perform(update);
+                return;
+            }
+
             if (handlerContainer.containsHandler(input)) {
                 handlerContainer.getHandler(input).perform(update);
             } else {
-                message = getMessageForUnknownHandler(update);
+                SendMessage message = getMessageForUnknownHandler(update);
                 messageDispatcherService.dispatch(new TelegramOutgoingMessage(message));
             }
 
