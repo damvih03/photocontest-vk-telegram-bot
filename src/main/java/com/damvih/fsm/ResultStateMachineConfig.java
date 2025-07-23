@@ -1,5 +1,6 @@
 package com.damvih.fsm;
 
+import com.damvih.fsm.action.ActionFactory;
 import com.damvih.fsm.action.AlbumReceivedResultAction;
 import com.damvih.fsm.action.ConfirmationReceivedResultAction;
 import com.damvih.fsm.action.GroupReceivedResultAction;
@@ -21,21 +22,21 @@ public class ResultStateMachineConfig extends EnumStateMachineConfigurerAdapter<
     private final GroupReceivedResultAction groupReceivedResultAction;
     private final AlbumReceivedResultAction albumReceivedResultAction;
     private final ConfirmationReceivedResultAction confirmationReceivedResultAction;
+    private final ActionFactory actionFactory;
     private final StateMachineListener<ResultState, ResultEvent> stateMachineListener;
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<ResultState, ResultEvent> config) throws Exception {
         config.withConfiguration()
-                .autoStartup(true)
                 .listener(stateMachineListener);
     }
 
     @Override
     public void configure(StateMachineStateConfigurer<ResultState, ResultEvent> states) throws Exception {
         states.withStates()
-                .initial(ResultState.WAITING_FOR_GROUP)
-                .state(ResultState.WAITING_FOR_ALBUM)
-                .state(ResultState.WAITING_FOR_CONFIRMATION)
+                .initial(ResultState.WAITING_FOR_GROUP, actionFactory.create("Введите номер группы: "))
+                .state(ResultState.WAITING_FOR_ALBUM, actionFactory.create("Введите номер альбома: "))
+                .state(ResultState.WAITING_FOR_CONFIRMATION, actionFactory.createConfirmationMessage())
                 .end(ResultState.COMPLETED);
     }
 

@@ -9,12 +9,14 @@ import com.damvih.message.TelegramOutgoingMessage;
 import com.damvih.service.CalculationResultService;
 import com.damvih.service.MessageDispatcherService;
 import com.damvih.util.ResultTextFormatter;
+import org.springframework.statemachine.ExtendedState;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ConfirmationReceivedResultAction extends ResultAction {
@@ -33,7 +35,7 @@ public class ConfirmationReceivedResultAction extends ResultAction {
         Update update = (Update) stateContext.getMessageHeader("payload");
 
         Long userId = update.getMessage().getChatId();
-        UserSettingsDto userSettingsDto = (UserSettingsDto) stateContext.getExtendedState().getVariables().get("userSettings");
+        UserSettingsDto userSettingsDto = getUserSettingsDto(stateContext.getExtendedState());
 
         String loadingMessage = "Начинается определение результата. Подождите, процесс может занимать до нескольких минут.";
         getMessageDispatcherService().dispatch(
@@ -45,7 +47,17 @@ public class ConfirmationReceivedResultAction extends ResultAction {
         List<ParticipantDto> participants = calculationResultService.calculate(userSettingsDto.getGroupId(), userSettingsDto.getAlbumId());
         participants = calculationResultService.sort(participants);
         List<ParticipantDto> winners = calculationResultService.getWinners(participants);
+        sendResultMessage(userId, participants, winners);
+    }
 
+    private UserSettingsDto getUserSettingsDto(ExtendedState extendedState) {
+        return new UserSettingsDto(
+                extendedState.get("groupId", Long.class),
+                extendedState.get("albumId", Long.class)
+        );
+    }
+
+    private void sendResultMessage(Long userId, List<ParticipantDto> participants, List<ParticipantDto> winners) {
         MessageDispatcherService messageDispatcherService = getMessageDispatcherService();
         TelegramMessageFactory telegramMessageFactory = getTelegramMessageFactory();
 
@@ -54,8 +66,6 @@ public class ConfirmationReceivedResultAction extends ResultAction {
 
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(sortedParticipantsResultMessage));
         messageDispatcherService.dispatch(new TelegramOutgoingMessage(winnersMessage));
-
-        stateContext.getExtendedState().getVariables().put("userId", userId);
     }
 
 }
